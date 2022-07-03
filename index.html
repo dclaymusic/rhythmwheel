@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="style.css">
+<title>Rhythm Wheel</title>
+<script src="snd.js"></script>
+<script src="start.js"></script>
+<script src="click.js"></script>
+<script src="character.js"></script>
+<script src="display.js"></script>
+<script type="text/javascript">
+
+        var hasStarted = false;
+        var infoWindow = false;
+        var isClickable = true;
+        var isPlaying = true;
+
+
+        const scale = 2;
+        const w = 440;
+        const h = 540;
+        const width = 440*scale;
+        const height = 540*scale;
+        const tileW = 110;
+        const tileH = 110;
+        const radians = Math.PI / 180;
+        const fadeDelay = 0.02;
+
+        const numberOfSounds = 47;
+
+        var soundtrackResetCount = 0;
+
+        const lineStart = 100;
+        const lineLength = 680;
+
+        var ctx = null;
+        var currentSecond = 0, frameCount = 0, framesLastSecond = 0, lastFrameTime = 0;
+        var currentFrameTime;
+        var mousePos = [];
+        var shapes = [];
+
+
+
+
+        //constant values for displays
+        const circleColors = [
+            '#f26767', 
+            '#72bbe8', 
+            '#f8ed49', 
+            '#7ebd42', 
+            '#8d63aa', 
+            '#f177ae', 
+            '#ca4d70', 
+            'white'
+        ];
+        const circleDegs = [270, 315, 0, 45, 90, 135, 180, 225];
+        const bgSnds = [270, 292.5, 315, 337.5, 0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5];
+        const timelineDegs = [0, 45, 90, 135, 180, 225, 270, 315];
+        var circleSpots = []; 
+
+        //change all to 'null' except first one
+        const circleScaleMin = 1.0;
+        const circleScaleMax = 1.2;
+        const lineScaleMin = 1.0;
+        const lineScaleMax = 1.2;
+        var circlesFilled = [1, null, null, null, null, null, null, null ];
+        var circleScales = [circleScaleMin, circleScaleMin, circleScaleMin, circleScaleMin, circleScaleMin, circleScaleMin, circleScaleMin, circleScaleMin];
+        var lineScales = [lineScaleMin, lineScaleMin, lineScaleMin, lineScaleMin, lineScaleMin, lineScaleMin, lineScaleMin, lineScaleMin];
+        var circleDistances = [];
+        const circleRad = 250;
+        const circleX = width * 0.5;
+        const circleY = height * 0.36;
+
+        var activeSounds = [];
+
+        //for timeline
+        const offsetY = 900;
+
+        var isNotes = true;
+        var loadedSound;
+        var displayRow;
+        var displaySoundLoaded = false;
+        var displayingSelections = false;
+        var isInfoScreen = false;
+
+        //SOUND INITIALIZING
+        var percOn = false;
+        var bassOn = false;
+        var chordOn = false;
+        
+        const audioCtx = new AudioContext();
+
+        loads01(); loads02(); loads03(); loads04(); loads05(); loads06(); loads07(); loads08();
+        loadsmenu01(); loadsmenu02(); loadsmenu03(); loadsmenu04(); loadsmenu05(); loadsmenu06(); loadsmenu07(); loadsmenu08();
+        loadp01(); loadp02(); loadp03(); loadp04(); loadp05(); loadp06(); loadp07(); loadp08(); loadp09(); loadp10(); loadp11(); loadp12(); loadp13(); loadp14(); loadp15(); loadp16();
+        loadb01(); loadb02(); loadb05(); loadb06(); loadb09(); loadb11(); loadb13(); loadb14(); loadb15(); 
+        loadc01(); loadc07(); loadc09(); loadc12(); loadc14(); 
+
+        loadclick();
+
+        //loading tilesets
+        var tileset = null, tilesetURL = "img/tiles.png",  tilesetLoaded = false;
+
+        var tileTypes = {
+
+            0: { }, //nothing at the moment
+
+            //for circle
+            1: { sprite:[{x:tileW*2, y:tileH*0, w:tileW, h:tileH}]}, //icon 1
+            2: { sprite:[{x:tileW*2, y:tileH*1, w:tileW, h:tileH}]}, //icon 2
+            3: { sprite:[{x:tileW*2, y:tileH*2, w:tileW, h:tileH}]}, //icon 3
+            4: { sprite:[{x:tileW*2, y:tileH*3, w:tileW, h:tileH}]}, //icon 4
+            5: { sprite:[{x:tileW*2, y:tileH*4, w:tileW, h:tileH}]}, //icon 5
+            6: { sprite:[{x:tileW*2, y:tileH*5, w:tileW, h:tileH}]}, //icon 6
+            7: { sprite:[{x:tileW*2, y:tileH*6, w:tileW, h:tileH}]}, //icon 7
+            8: { sprite:[{x:tileW*2, y:tileH*7, w:tileW, h:tileH}]}, //icon 8
+
+            //for line
+            9: { sprite:[{x:tileW*3, y:tileH*0, w:tileW, h:tileH}]}, //icon 1
+            10: { sprite:[{x:tileW*3, y:tileH*1, w:tileW, h:tileH}]}, //icon 2
+            11: { sprite:[{x:tileW*3, y:tileH*2, w:tileW, h:tileH}]}, //icon 3
+            12: { sprite:[{x:tileW*3, y:tileH*3, w:tileW, h:tileH}]}, //icon 4
+            13: { sprite:[{x:tileW*3, y:tileH*4, w:tileW, h:tileH}]}, //icon 5
+            14: { sprite:[{x:tileW*3, y:tileH*5, w:tileW, h:tileH}]}, //icon 6
+            15: { sprite:[{x:tileW*3, y:tileH*6, w:tileW, h:tileH}]}, //icon 7
+            16: { sprite:[{x:tileW*3, y:tileH*7, w:tileW, h:tileH}]}, //icon 8
+
+            17: { sprite:[{x:tileW*1, y:tileH*0, w:tileW, h:tileH}]}, //gnome 1 - side
+            18: { sprite:[{x:tileW*1, y:tileH*0, w:tileW, h:tileH}]}, //gnome 2 - side
+
+            19: { sprite:[{x:tileW*1, y:tileH*1, w:tileW, h:tileH}]}, //gnome 1 - vert
+            20: { sprite:[{x:tileW*1, y:tileH*1, w:tileW, h:tileH}]}, //gnome 2 - vert
+
+            21: { sprite:[{x:tileW*0, y:tileH*0, w:tileW, h:tileH}]}, //eighth
+            22: { sprite:[{x:tileW*0, y:tileH*1, w:tileW, h:tileH}]}, //quarter
+            23: { sprite:[{x:tileW*0, y:tileH*2, w:tileW, h:tileH}]}, //dotted quarter
+            24: { sprite:[{x:tileW*0, y:tileH*3, w:tileW, h:tileH}]}, //half
+            25: { sprite:[{x:tileW*0, y:tileH*6, w:tileW*2, h:tileH}]}, //half-plus-eighth
+            26: { sprite:[{x:tileW*0, y:tileH*4, w:tileW, h:tileH}]}, //dotted half
+            27: { sprite:[{x:tileW*0, y:tileH*7, w:tileW*2, h:tileH * 1.2}]}, //dotted half-plus-eighth
+            28: { sprite:[{x:tileW*0, y:tileH*5, w:tileW, h:tileH}]}, //whole
+
+            29: { sprite:[{x:tileW*4, y:tileH*0, w:tileW, h:tileH}]}, //1/8
+            30: { sprite:[{x:tileW*4, y:tileH*1, w:tileW, h:tileH}]}, //1/4
+            31: { sprite:[{x:tileW*4, y:tileH*2, w:tileW, h:tileH}]}, //3/8
+            32: { sprite:[{x:tileW*4, y:tileH*3, w:tileW, h:tileH}]}, //1/2
+            33: { sprite:[{x:tileW*4, y:tileH*6, w:tileW, h:tileH}]}, //3/4
+            34: { sprite:[{x:tileW*4, y:tileH*4, w:tileW, h:tileH}]}, //1/1
+            35: { sprite:[{x:tileW*4, y:tileH*7, w:tileW, h:tileH}]}, //5/8
+            36: { sprite:[{x:tileW*4, y:tileH*5, w:tileW, h:tileH}]} //7/8
+
+
+        };
+
+        //Viewport Scanning
+        var viewport = { screen : [0,0] };
+        window.onload = function()
+        {
+            ctx = document.getElementById('canvas').getContext("2d");
+            requestAnimationFrame(drawGame);
+            ctx.font = "bold 10pt sans-serif";
+
+            //window.addEventListener('mousemove', function(e) { getHoverOver(e) });
+            window.addEventListener('click', function(e) { clickHandler(e) });
+            window.addEventListener('mousemove', function(e) { mousePos = getHoverOver(e); });
+            
+            viewport.screen = [document.getElementById('canvas').width,
+                document.getElementById('canvas').height];
+
+            tileset = new Image();
+            tileset.onerror = function()
+            { ctx = null; alert("Failed loding tileset."); };
+            tileset.onload = function() { tilesetLoaded = true; }
+            tileset.src = tilesetURL;
+            
+        };
+
+        //make ball
+        var char = new Character();
+
+        function drawGame()
+        {
+            if(ctx==null) { return; }
+
+            currentFrameTime = Date.now();
+            var timeElapsed = currentFrameTime - lastFrameTime;
+            var sec = Math.floor(Date.now()/1000);
+
+            if(sec!=currentSecond)
+            {
+                currentSecond = sec;
+                framesLastSecond = frameCount;
+                frameCount = 1;
+            }
+            else { frameCount++; }
+
+            //set background
+            ctx.globalAlpha = 1.0;
+            ctx.fillStyle = "#fee9D4";
+            ctx.fillRect(0, 0, viewport.screen[0], viewport.screen[1]);
+
+            if(hasStarted) //app is playing
+            {
+
+                drawCirclePoints();
+                drawDroppedItems();
+                drawPartitions();
+                drawPartitionRhythmsAndBoxes();
+                if(isPlaying)
+                {
+                    char.draw();    
+                }
+
+                if(loadedSound != null)
+                { updateLoadedSound(); }
+
+            }
+            else if(!hasStarted) //loading sounds
+            { loadbarHandler(); }
+            
+            //frameRate();
+            lastFrameTime = currentFrameTime;
+            requestAnimationFrame(drawGame);
+
+        }
+
+
+</script>
+
+</head>
+
+<body id="body">
+    <header>
+        <div id="gamehead">
+            <!-- <p>Sound Bank</p> -->
+            <img id="s1" src="img/s1.png" onclick="sndPick(1)">
+            <img id="s2" src="img/s2.png" onclick="sndPick(2)">
+            <img id="s3" src="img/s3.png" onclick="sndPick(3)">
+            <img id="s4" src="img/s4.png" onclick="sndPick(4)">
+            <img id="s5" src="img/s5.png" onclick="sndPick(5)">
+            <img id="s6" src="img/s6.png" onclick="sndPick(6)">
+            <img id="s7" src="img/s7.png" onclick="sndPick(7)">
+            <img id="s8" src="img/s8.png" onclick="sndPick(8)">
+
+        </div>
+    </header>
+    <main id="main">
+        <canvas id="canvas" width="880" height="1080"></canvas>
+
+        <img id="h1" class="hoverimages" src="img/h1.png">
+        <img id="h2" class="hoverimages" src="img/h2.png">
+        <img id="h3" class="hoverimages" src="img/h3.png">
+        <img id="h4" class="hoverimages" src="img/h4.png">
+        <img id="h5" class="hoverimages" src="img/h5.png">
+        <img id="h6" class="hoverimages" src="img/h6.png">
+        <img id="h7" class="hoverimages" src="img/h7.png">
+        <img id="h8" class="hoverimages" src="img/h8.png">
+        
+        <div id="loadscreen">
+            <img id="titleimg" src="img/title.png">
+            <p>Divide the circle into fractions to make a melody!</p>
+            <div id="loadbarfull"> </div>
+            <div id="loadbarloading"></div>
+            <p id="loadtext">Sounds are loading...</p>
+        </div>
+
+        <div id="infoscreen">
+            <img id="infotitle" src="img/title.png">
+            <div id="infotext">
+                <ul>
+                    <li>Click on a tone to the left to select it.</li>
+                    <li>Add the selected tone to your melody circle by clicking on any square.</li>
+                    <li>If you don't have a tone selected, click on a tone that's already in the melody circle to remove it.</li>
+                    <li>Use <span class="bold">Display</span> to view your rhythms as notes or fractions.</li>
+                    <li>Try hearing your melody with a different <span class="bold">Speed,</span> or add instruments using <span class="bold">Soundtrack!</span></li>
+                    <li>Hear a surprise melody by clicking <span class="bold">Shuffle.</span></li>
+                    <li>Open and close this window by clicking <span class="bold">Info.</span></li>
+
+                </ul>
+
+            </div>
+        </div>
+
+    </main> 
+    <footer>
+        <div id="gamefoot">
+            <div id="playtoggle">
+                <img id="playbutton" src="img/stopimg.png" onclick="togglePlay()">
+                <p id="playtext">Stop</p>
+            </div>
+
+            <div id="displayselect">
+                <div id="notes">
+                    <img id="noteimg" src="img/note2.png" onclick="toggleDisplay(0)">
+                </div>
+                <div id="fractions">
+                    <img id="fractionimg" src="img/fraction1.png" onclick="toggleDisplay(1)">
+                </div>
+                <p id="displaytext">Display</p>
+            </div>
+
+            <div id="speedselect">
+                <div id="slow">
+                    <img id="imgslow" src="img/imgslow2.png" onclick="toggleSpeed(0.75)">
+                </div>
+                <div id="medium">
+                    <img id="imgmed" src="img/imgmed.png" onclick="toggleSpeed(1.5)">
+                </div>
+                <div id="fast">
+                    <img id="imgfast" src="img/imgfast.png" onclick="toggleSpeed(3.0)">
+                </div>
+                <p id="speedtext">Speed</p>
+            </div>
+
+            <div id="bgmusic">
+                <div id="percdiv">
+                    <img id="perc" src="img/imgperc.png" onclick="togglePercGain()">
+                </div>
+                <div id="bassdiv">
+                    <img id="bass" src="img/imgbass.png" onclick="toggleBassGain()">
+                </div>
+                <div id="chorddiv">
+                    <img id="chord" src="img/imgchord.png" onclick="toggleChordGain()">
+                </div>
+                <p id="soundtracktext">Soundtrack</p>
+
+            </div>
+
+            <div id="randomselect">
+                <img id="randombutton" src="img/randimg.png" onclick="shuffleSounds()">
+                <p id="shuffletext">Shuffle</p>
+            </div>
+
+            <div id="startover">
+                <img src="img/clearimg.png" onclick="clearAllSounds()">
+                <p>Start Over</p>
+            </div>
+
+            <div id="info">
+                <img id="infoimg" src="img/infoimg.png" onclick="toggleInfoScreen()"> 
+                <p>Info</p>
+            </div>
+
+        </div>
+    </footer>
+</body>
+</html>

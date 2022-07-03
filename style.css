@@ -1,0 +1,223 @@
+@font-face {
+    font-family: 'Andika';
+    src: url(andika.ttf);
+}
+
+html {
+    background-color: #ffffff; 
+    user-select: none;
+}
+
+body {
+    line-height: 16px;
+    user-select: none;
+    display: flex;
+    margin: 0px;
+    padding: 0px; 
+    overflow:hidden; 
+    font-family: 'Andika'; 
+    font-weight: bold;     
+}
+
+button {
+    font-family: 'Andika';
+}
+
+#gamefoot, #gamehead {
+    visibility: hidden;
+}
+
+header, footer {
+    text-align: center;
+    background-color: #1f1f1f;
+    color: white;
+    min-width: 100px;
+    max-width: 100px;
+    padding: 10px 20px;
+    min-height: 520px;
+    max-height: 520px;
+}
+
+canvas, main {
+    /* background-color: #888888; */
+    margin: 0px;
+    padding: 0px;
+    width: 440px;
+    height: 540px;
+}
+
+
+#loadscreen {
+    width: 440px;
+    height: 540px;
+    position: fixed;
+    top: 0;
+    line-height: 30px;
+    background-color: #fee9D4;
+    background-size: 600px 540px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+#loadtext {
+    margin-top: 10px;
+}
+
+#titleimg {
+    width: 80%;
+    padding: 0px;
+    margin-bottom: -30px;
+
+}
+
+#loadbarfull, #loadbarloading {
+    /* all px relative to loadscreen */
+    position: relative;
+    border: 2px solid black;
+    border-radius: 5px;
+    background-color: #f0ebf0;
+    height: 30px;
+    width: 200px;
+    margin: auto;
+
+}
+
+#loadbarfull {
+    box-shadow: 5px 5px rgba(0,0,0,0.5);
+}
+
+#loadbarloading {
+    top: -34px;
+    margin-bottom: -30px;
+    background-color: #ff0000;
+}
+
+#loadscreen p{
+    font-weight: bold;
+    font-size: 18px;
+}
+
+#gamehead {
+    margin-top: 2px;
+    font-size: 25px;
+    font-weight: bold;
+    line-height: 25px;
+}
+
+#gamehead > img {
+    display: inline;
+    width: 60px;
+    height: 60px;
+    margin: 1px;
+    cursor: pointer;
+}
+
+#modeselect {
+    display: block;
+    line-height: 0;
+}
+
+#modeselect input{
+  display: none;
+}
+
+#gamefoot {
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    
+}
+
+.hoverimages {
+    width: 60px;
+    height: 60px;
+    position: absolute;
+    visibility: hidden;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+#gamefoot img {
+    width: 45px;
+    margin: 0;
+    cursor: pointer;
+}
+
+
+#gamefoot p {
+ margin-top: -5px;
+ margin-bottom: 0px;
+}
+
+#playtext, #shuffletext {
+    line-height: 25px;
+}
+
+#speedselect, #bgmusic {
+    padding: 0px;
+    margin: 0px;
+}
+
+
+#playtoggle { 
+    margin-bottom: -10px;
+}
+
+#displayselect div {
+    display: inline-block;
+    width: 45px;
+    height: 45px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 0px;
+    background-color: white;
+}
+
+#speedselect div, #bgmusic div {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    margin-bottom: 10px;
+    padding: 0px;
+    background-color: white;
+}
+
+#speedselect img, #bgmusic img {
+   width: 100%;
+}
+
+#infoscreen {
+    width: 440px;
+    height: 540px;
+    position: fixed;
+    top: 0;
+    background-color: #fee9D4;
+    background-size: 600px 540px;
+    text-align: center;
+    visibility: hidden;
+}
+
+#infotitle {
+    margin-left: auto;
+    width: 40%;
+    margin-top: 5px;
+    margin-bottom: -10px;
+}
+
+#infoscreen li {
+    margin-left: 10px;
+    text-align: left;
+    line-height: 1.1em;
+    padding: 8px;
+}
+
+#infoscreen .bold {
+    font-size: 1.1em;
+    text-decoration: underline;
+    font-weight: 900;
+}
+
+#startover {
+    margin-top: -10px;
+}
